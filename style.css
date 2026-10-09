@@ -1,0 +1,786 @@
+/* ==========================================================================
+   Beatrice Branciamore, portfolio
+   Palette and type taken from the Figma file "Portfolio-BB".
+   ========================================================================== */
+
+/* Optional: if your Figma headings used a specific monospace font, put its
+   .woff2 file in assets/fonts/ and uncomment this block, then add the family
+   name to the front of --mono below.
+@font-face {
+  font-family: "Portfolio Mono";
+  src: url("assets/fonts/your-font-italic.woff2") format("woff2");
+  font-style: italic;
+  font-display: swap;
+}
+*/
+
+:root {
+  /* Palette (from the Figma colour list) */
+  --ink-0: #020D11;
+  --ink-1: #0E1F25;
+  --ink-2: #16272C;
+  --paper: #FFFDFD;
+  --card: #D9D8D8;
+  --teal: #4A665F;
+  --teal-ink: #3B5650;   /* darker teal for text on the light card */
+  --periwinkle: #8B99B7;
+  --cat-technical: #003049;
+  --cat-methods: #4B5675;
+  --cat-languages: #201010;
+  --cat-soft: #3F0E0E;
+
+  --line: rgba(255, 253, 253, 0.82);
+  --text-soft: rgba(255, 253, 253, 0.9);
+
+  /* Type */
+  --mono: "SF Mono", ui-monospace, Menlo, Consolas, "Liberation Mono", "DejaVu Sans Mono", monospace;
+  --sans: "Helvetica Neue", Helvetica, Arial, "Nimbus Sans", "Liberation Sans", sans-serif;
+
+  /* Spring from the Figma prototype (mass 1, stiffness 200, damping 15).
+     script.js replaces these with an exact curve where the browser supports it. */
+  --spring: cubic-bezier(0.34, 1.45, 0.64, 1);
+  --spring-dur: 700ms;
+
+  --gutter: clamp(1rem, 4vw, 2.75rem);
+  --content: 72rem;
+}
+
+/* ---------- Reset ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--paper);
+  background: var(--ink-1);
+}
+h1, h2, h3, h4, p, ul, ol { margin: 0; }
+ul, ol { padding: 0; list-style: none; }
+a { color: inherit; }
+button { font: inherit; color: inherit; }
+img, svg { display: block; max-width: 100%; }
+
+:focus-visible {
+  outline: 2px solid var(--paper);
+  outline-offset: 3px;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0);
+  white-space: nowrap; border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  left: 1rem; top: -4rem;
+  z-index: 10;
+  padding: 0.6rem 1rem;
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--ink-1);
+  text-decoration: none;
+}
+.skip-link:focus { top: 1rem; }
+
+/* ---------- Page and gradient backdrop ---------- */
+.page {
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: clamp(1rem, 3.5vw, 2.75rem) var(--gutter) clamp(4rem, 10vw, 7rem);
+}
+
+/* Two stacked layers so one gradient can fade into the next.
+   The gradient spans the whole page height, like the Figma frames. */
+.backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 700ms ease;
+}
+.backdrop.is-on { opacity: 1; }
+
+/* Bottom stops are slightly darker than in Figma so white text stays readable
+   (at least 4.5:1 contrast) all the way down the page. */
+.backdrop[data-theme="home"] {
+  background: linear-gradient(180deg, #0E1F25 0%, #16272C 30%, #2F4642 65%, #4A665F 100%);
+}
+.backdrop[data-theme="skill-set"] {
+  background: linear-gradient(180deg, #0E1F25 0%, #3A1E22 25%, #6A3335 45%, #6D5858 75%, #6B6868 100%);
+}
+.backdrop[data-theme="experience"] {
+  background: linear-gradient(180deg, #020D11 0%, #05232C 25%, #1C3B52 60%, #4D6681 100%);
+}
+.backdrop[data-theme="education"] {
+  background: linear-gradient(180deg, #16272C 0%, #2C3436 30%, #4F4A4C 65%, #6A6574 100%);
+}
+.backdrop[data-theme="creative-core"] {
+  background: linear-gradient(180deg, #0A0A12 0%, #1A1020 25%, #2C2B45 60%, #4F6880 100%);
+}
+.backdrop[data-theme="lets-collaborate"] {
+  background: linear-gradient(180deg, #0E1F25 0%, #1F2C2B 35%, #3A524C 70%, #5E6B76 100%);
+}
+/* The Figma card flip also flips the page gradient. */
+.backdrop[data-theme="lets-collaborate-back"] {
+  background: linear-gradient(0deg, #0E1F25 0%, #1F2C2B 35%, #3A524C 70%, #5E6B76 100%);
+}
+
+/* ---------- Navigation capsule ---------- */
+.site-header {
+  max-width: var(--content);
+  margin: 0 auto;
+}
+
+.capsule {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.5rem clamp(1.25rem, 3vw, 2.75rem);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.25rem;
+  padding: 0.4rem 1.4rem;
+  border: 0;
+  border-radius: 999px;
+  font-family: var(--sans);
+  font-size: 0.9375rem;
+  line-height: 1.2;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
+}
+.pill--home { background: var(--ink-2); color: var(--paper); }
+.pill--home:hover { background: var(--ink-0); }
+.pill--home[aria-current="page"] { box-shadow: 0 0 0 1px var(--line); }
+
+.pill--collab { background: var(--paper); color: var(--ink-1); }
+.pill--collab:hover { background: var(--card); }
+.pill--collab[aria-current="page"] { background: var(--ink-1); color: var(--paper); }
+
+.pill--light { background: var(--paper); color: var(--ink-1); }
+.pill--light:hover { background: var(--card); }
+.pill--dark { background: var(--ink-2); color: var(--paper); font-weight: 700; }
+.pill--dark:hover { background: var(--ink-0); }
+
+/* The four interlocking rings. Sized in em so the whole cluster scales
+   from one font-size. */
+.cluster {
+  position: relative;
+  flex: none;
+  width: 21.6em;
+  height: 5em;
+  margin-left: auto;
+  font-size: 0.9375rem;
+}
+.cluster li { display: contents; }
+
+.ring {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.7em;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-family: var(--sans);
+  font-size: 1em;
+  text-decoration: none;
+  transition: background-color 160ms ease;
+}
+.ring:hover { background: rgba(255, 253, 253, 0.08); }
+.ring[aria-current="page"] {
+  z-index: 2;
+  background: var(--ink-0);
+  border-color: var(--ink-0);
+}
+/* Labels are nudged away from the overlaps, but only partly: centring them
+   fully in the visible area over-corrected. Padding moves a label by half its
+   value. Education stays centred; it reads better that way. */
+.ring--skills     { left: 0;      top: 1.3em;  width: 7.8em; padding-right: 0.32em; }
+.ring--experience { left: 6.75em; top: 0;      width: 7.9em; padding-bottom: 0.34em; }
+.ring--education  { left: 6.95em; top: 2.25em; width: 7.4em; }
+.ring--core       { left: 13.5em; top: 1.3em;  width: 8.1em; padding-left: 0.33em; }
+/* The active ring is filled and drawn on top, so all of it is visible:
+   centre its label in the whole ring again. */
+.ring[aria-current="page"] { padding: 0; }
+.ring--experience:focus-visible, .ring--education:focus-visible { z-index: 3; }
+
+
+/* ---------- Views ---------- */
+main {
+  max-width: var(--content);
+  margin: 0 auto;
+  padding-top: clamp(3rem, 8vw, 5.5rem);
+}
+
+.view { padding-inline: clamp(0rem, 7vw, 5.5rem); }  /* same side margins on every page */
+.view + .view { margin-top: 6rem; }          /* only matters without JavaScript */
+.js .view + .view { margin-top: 0; }
+.js .view[hidden] { display: none; }
+.js .view.is-entering { animation: view-in 420ms ease both; }
+@keyframes view-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.page-title,
+.section-title,
+.hero__name {
+  font-family: var(--mono);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  line-height: 1.1;
+}
+.page-title {
+  font-size: clamp(2.25rem, 6vw, 3.4rem);
+  margin-bottom: clamp(2.5rem, 6vw, 4.5rem);
+}
+.page-title:focus, .hero__name:focus { outline: none; }
+.section-title {
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  margin-bottom: clamp(2rem, 4vw, 3rem);
+}
+.block + .block { margin-top: clamp(4rem, 9vw, 6.5rem); }
+
+/* ---------- Home ---------- */
+.hero {
+  max-width: 46rem;
+  margin-bottom: clamp(4.5rem, 10vw, 7rem);
+}
+.hero__name {
+  font-size: clamp(2.5rem, 7.5vw, 4.5rem);
+  margin-bottom: 1rem;
+}
+.hero__role {
+  font-family: var(--mono);
+  font-size: clamp(1rem, 2.4vw, 1.2rem);
+  color: var(--periwinkle);
+  margin-bottom: 2rem;
+}
+.hero__about {
+  max-width: 36em;
+  font-size: clamp(1.05rem, 2.2vw, 1.2rem);
+  line-height: 1.6;
+  color: var(--text-soft);
+}
+
+#home .section-title { padding-left: 0; }
+
+.projects {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+  gap: 3rem clamp(2rem, 5vw, 4rem);
+}
+.project {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid rgba(255, 253, 253, 0.35);
+}
+.project__meta {
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  color: var(--periwinkle);
+}
+.project__title {
+  font-family: var(--mono);
+  font-size: 1.0625rem;
+  font-weight: 400;
+  line-height: 1.35;
+}
+.project__text {
+  font-size: 0.9375rem;
+  color: var(--text-soft);
+}
+.project .tags { justify-content: flex-start; margin-top: 0.3rem; }
+.project__link a { font-size: 0.9375rem; text-underline-offset: 0.2em; }
+
+/* ---------- Shared entry pieces (experience, education) ---------- */
+.org {
+  display: inline-block;
+  padding: 0.15em 0.75em;
+  border: 1px solid var(--line);
+  border-radius: 0.85em;  /* a full pill on one line, a neat rounded box if it wraps */
+  font-family: var(--mono);
+  font-size: 1rem;
+  line-height: 1.4;
+}
+.entry__date {
+  font-family: var(--mono);
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+.entry__role {
+  font-family: var(--mono);
+  font-size: 1.0625rem;
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  margin-bottom: 0.65rem;
+}
+.entry__sub {
+  font-size: 0.875rem;
+  color: var(--periwinkle);
+  margin: -0.35rem 0 0.75rem;
+}
+.entry__body p,
+.entry__points li {
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--text-soft);
+}
+.entry__points li + li,
+.entry__body p + p { margin-top: 0.85rem; }
+.entry__logo {
+  width: 3.5rem;
+  height: 3.5rem;
+  object-fit: contain;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.45rem 0.4rem;
+  align-content: center;
+}
+.tags li {
+  padding: 0.28em 0.85em;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 0.875rem;
+  line-height: 1.3;
+}
+
+/* ---------- Experience ---------- */
+.entry {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.75rem 1rem;
+  align-items: center;
+}
+.entry + .entry { margin-top: clamp(3rem, 7vw, 4.75rem); }
+.entry__date { grid-column: 1; grid-row: 1; }
+.entry__org  { grid-column: 2; grid-row: 1; }
+.entry__logo { display: none; }
+.entry__body { grid-column: 1 / -1; grid-row: 2; }
+.entry > .tags { grid-column: 1 / -1; grid-row: 3; justify-content: flex-start; }
+
+.programmes { display: grid; gap: 2rem; }
+.programme {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.4rem;
+}
+.programme__name {
+  font-family: var(--mono);
+  font-size: 1rem;
+  font-weight: 400;
+  margin-bottom: 0.3rem;
+}
+.programme p:not(.entry__date) {
+  font-size: 0.9375rem;
+  color: var(--text-soft);
+  max-width: 40rem;
+}
+
+@media (min-width: 56em) {
+  .entry {
+    grid-template-columns: 9.5rem minmax(0, 33rem) minmax(0, 1fr);
+    gap: 0.9rem 1.75rem;
+  }
+  .entry__date { text-align: right; }
+  .entry__org  { grid-column: 2; }
+  .entry__logo { display: block; grid-column: 1; grid-row: 2; justify-self: end; align-self: start; }
+  .entry__body { grid-column: 2; grid-row: 2; }
+  .entry > .tags { grid-column: 3; grid-row: 2; justify-content: center; padding-left: 1rem; }
+
+  .section-title { padding-left: clamp(0rem, 6vw, 4rem); }
+  .view:not(#home) .page-title { padding-left: 5.5rem; }
+  #skill-set .title-row .page-title { padding-left: 0; }
+  .title-row { padding-left: 11rem; }
+  .principles { margin-left: 5rem; }
+
+  .programme {
+    grid-template-columns: 9.5rem minmax(0, 40rem);
+    gap: 1.75rem;
+    align-items: baseline;
+  }
+  .programme .entry__date { text-align: right; }
+}
+
+/* ---------- Skill set ---------- */
+.title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 2.5rem;
+  margin-bottom: clamp(2.5rem, 6vw, 4rem);
+}
+.title-row .page-title { margin: 0; padding: 0; }
+.skills-toggle { display: none; min-width: 9rem; }
+.js .skills-toggle { display: inline-flex; }
+
+.skills {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.75rem;
+  max-width: 64rem;
+  margin: 0 auto;
+}
+.skills[data-mode="mixed"] { display: block; }
+
+.skill-group {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+}
+.skill-group { align-content: flex-start; align-self: start; }
+.skill-group[hidden] { display: none; }
+.skill-list { display: contents; }
+.skill-mix {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem 0.5rem;
+}
+.skill-mix[hidden] { display: none; }
+
+.skill,
+.skill-label {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.15rem;
+  padding: 0.3rem 1.05rem;
+  border-radius: 999px;
+  font-family: var(--sans);
+  font-size: 0.9375rem;
+  font-weight: 400;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.skill { color: var(--paper); will-change: transform; }
+.skill[data-cat="technical"] { background: var(--cat-technical); }
+.skill[data-cat="methods"]   { background: var(--cat-methods); }
+.skill[data-cat="languages"] { background: var(--cat-languages); }
+.skill[data-cat="soft"]      { background: var(--cat-soft); }
+.skill-label {
+  border: 1.5px solid var(--line);
+  background: transparent;
+}
+
+@media (min-width: 56em) {
+  .skills {
+    grid-template-columns: 1.5fr 1fr;
+    column-gap: 3rem;
+    row-gap: 2rem;
+  }
+  .skill-group[data-cat="methods"],
+  .skill-group[data-cat="soft"] { grid-column: 1 / -1; }
+}
+
+/* ---------- Education ---------- */
+.edu-wrap { position: relative; }
+.edu-line { display: none; }
+
+.edu { display: grid; gap: clamp(3rem, 7vw, 4rem); }
+.edu-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.75rem 1rem;
+  align-items: center;
+}
+.edu-item .entry__date { grid-column: 1; grid-row: 1; }
+.edu-item .entry__org  { grid-column: 2; grid-row: 1; }
+.edu-item .entry__logo { display: none; }
+.edu-item .entry__body { grid-column: 1 / -1; grid-row: 2; }
+
+@media (min-width: 56em) {
+  .edu-line {
+    display: block;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+  }
+  .edu-line polyline {
+    fill: none;
+    stroke: var(--line);
+    stroke-width: 1;
+  }
+
+  .edu {
+    grid-template-columns: 1fr 1fr;
+    column-gap: clamp(6rem, 12vw, 10rem);
+    row-gap: 0;
+  }
+  .edu-item {
+    grid-template-columns: 6.5rem minmax(0, 1fr);
+    gap: 0.9rem 1.25rem;
+    max-width: 27rem;
+    padding-bottom: 1.5rem;
+  }
+  .edu-item .entry__date { text-align: right; }
+  .edu-item .entry__logo { display: block; grid-column: 1; grid-row: 2; justify-self: end; align-self: start; }
+  .edu-item .entry__body { grid-column: 2; }
+  /* Alternate columns. Each entry spans two grid rows and starts one row
+     after the previous one, so neighbours overlap by about half, as in Figma. */
+  .edu-item { align-self: start; }
+  .edu-item:nth-child(odd)  { grid-column: 1; }
+  .edu-item:nth-child(even) { grid-column: 2; padding-top: 2.5rem; }
+  .edu-item:nth-child(1) { grid-row: 1 / span 2; }
+  .edu-item:nth-child(2) { grid-row: 2 / span 2; }
+  .edu-item:nth-child(3) { grid-row: 3 / span 2; }
+  .edu-item:nth-child(4) { grid-row: 4 / span 2; }
+  .edu-item:nth-child(5) { grid-row: 5 / span 2; }
+  .edu-item:nth-child(6) { grid-row: 6 / span 2; }
+}
+
+/* ---------- Creative core ---------- */
+.cloud {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto clamp(4rem, 10vw, 6.5rem);
+  font-family: var(--sans);
+  font-style: italic;
+  font-weight: 700;
+  line-height: 1.05;
+}
+.cloud__line {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  column-gap: 0.4em;
+}
+.w--xl { font-size: clamp(2rem, 6vw, 3rem); color: var(--paper); }
+.w--m  { font-size: clamp(1.35rem, 3.6vw, 1.85rem); color: var(--periwinkle); }
+.w--ghost {
+  font-size: clamp(1.15rem, 3vw, 1.5rem);
+  color: rgba(139, 153, 183, 0.55);
+}
+@supports (-webkit-text-stroke: 1px) {
+  .w--ghost {
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(139, 153, 183, 0.7);
+  }
+}
+@media (min-width: 56em) {
+  .cloud { margin-right: 12%; margin-left: auto; }
+}
+
+.principles {
+  position: relative;
+  display: grid;
+  gap: clamp(3.5rem, 9vw, 5.5rem);
+  max-width: 42rem;
+  padding-left: 3.25rem;
+}
+/* The rail: one long capsule, with a pair of linked rings at each principle. */
+.principles::before {
+  content: "";
+  position: absolute;
+  left: 0.6rem;
+  top: 0;
+  bottom: 0;
+  width: 1.4rem;
+  border: 1px solid var(--line);
+  border-radius: 0.7rem;
+}
+.principle { position: relative; }
+.principle::before,
+.principle::after {
+  content: "";
+  position: absolute;
+  left: -2.65rem;
+  width: 1.4rem;
+  height: 1.4rem;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+}
+.principle::before { top: 0.05rem; }
+.principle::after  { top: 0.75rem; }
+.principle__title {
+  font-family: var(--mono);
+  font-size: clamp(1.15rem, 2.6vw, 1.4rem);
+  font-weight: 400;
+  margin-bottom: 0.35rem;
+}
+.principle p { color: var(--text-soft); }
+
+/* ---------- Let's collaborate ---------- */
+.card-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.75rem;
+}
+.card {
+  --w: min(29.5rem, 100%);
+  width: var(--w);
+  aspect-ratio: 1.75 / 1;
+  perspective: 1400px;
+}
+.js .card { cursor: pointer; }
+.card__inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform var(--spring-dur) var(--spring);
+}
+.card[data-flipped="true"] .card__inner { transform: rotateY(180deg); }
+
+.card__face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1.25rem;
+  background: var(--card);
+  color: var(--teal-ink);
+  box-shadow:
+    0 6px 16px rgba(0, 0, 0, 0.35),
+    inset 0 0 0 2px rgba(255, 255, 255, 0.45),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.12);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+.card__back { transform: rotateY(180deg); padding: 1.25rem clamp(1rem, 6%, 3rem); }
+
+/* Without JavaScript the card cannot flip, so show the contact side. */
+html:not(.js) .card__front { display: none; }
+html:not(.js) .card__back { transform: none; }
+
+.card__mono {
+  font-family: var(--sans);
+  font-style: italic;
+  font-weight: 700;
+  font-size: clamp(1.75rem, 6vw, 2.25rem);
+  letter-spacing: 0.02em;
+}
+
+.contact-list {
+  display: grid;
+  gap: clamp(1rem, 5vw, 2.25rem);
+  width: 100%;
+}
+.contact-list li {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.75rem, 3vw, 1.5rem);
+  min-width: 0;
+}
+.contact-icon {
+  flex: none;
+  width: clamp(2.25rem, 9vw, 3.1rem);
+  height: auto;
+  fill: none;
+  stroke: var(--teal);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.contact-list a {
+  min-width: 0;
+  font-style: italic;
+  font-weight: 700;
+  font-size: clamp(0.85rem, 3.7vw, 1.15rem);
+  color: var(--teal-ink);
+  text-underline-offset: 0.18em;
+  overflow-wrap: anywhere;
+}
+.contact-list li:not(:first-child) a { text-decoration: none; }
+.contact-list a:hover { text-decoration: underline; }
+.contact-list a:focus-visible { outline-color: var(--teal-ink); }
+
+.flip-control { display: none; }
+.js .flip-control { display: flex; align-items: center; }
+.flip-arrow { display: none; }
+
+@media (min-width: 48em) {
+  .card-stage {
+    position: relative;
+    width: fit-content;
+    margin: 0 auto;
+  }
+  .card { --w: 29.5rem; }
+  .js .flip-control {
+    position: absolute;
+    left: calc(100% - 3rem);
+    top: 50%;
+    display: block;
+  }
+  .flip-btn { margin-left: 3.75rem; }
+  .flip-arrow {
+    display: block;
+    width: 5.75rem;
+    margin-top: 0.75rem;
+    overflow: visible;
+  }
+  .flip-arrow path { fill: none; stroke: var(--ink-2); stroke-width: 4.5; stroke-linecap: round; }
+  .flip-arrow .flip-arrow__head { fill: var(--ink-2); stroke: none; }
+}
+
+/* ---------- Phones: stack date above organisation ---------- */
+@media (max-width: 39.99em) {
+  .entry,
+  .edu-item { grid-template-columns: minmax(0, 1fr); gap: 0.6rem; }
+  .entry .entry__date, .edu-item .entry__date { grid-column: 1; grid-row: 1; }
+  .entry .entry__org,  .edu-item .entry__org  { grid-column: 1; grid-row: 2; justify-self: start; }
+  .entry .entry__body, .edu-item .entry__body { grid-column: 1; grid-row: 3; margin-top: 0.4rem; }
+  .entry > .tags { grid-column: 1; grid-row: 4; }
+}
+
+/* ---------- Mobile navigation ---------- */
+@media (max-width: 47.99em) {
+  .capsule {
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.1rem 1.25rem;
+    border-radius: 2rem;
+  }
+  .pill--home  { order: 1; }
+  .pill--collab { order: 2; }
+  .cluster {
+    order: 3;
+    margin: 0 auto;
+    font-size: clamp(0.7rem, 3.3vw, 0.9375rem);
+  }
+  .pill { font-size: 0.875rem; padding: 0.4rem 1.1rem; }
+}
+
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
